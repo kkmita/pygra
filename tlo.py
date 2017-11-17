@@ -9,6 +9,16 @@ Created on Fri Nov 17 14:45:49 2017
 import pygame
 import pygame.locals
 import configparser
+import sys
+
+
+class Gracz(pygame.sprite.Sprite):
+    
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self) #Self.groups?
+        self.image = pygame.image.load('player.png')
+        self.rect = self.image.get_rect()
+
 
 
 class Level:
@@ -61,7 +71,14 @@ class Level:
 #==============================================================================
 
         
-    def render(self):
+    def render_background(self):
+        
+        
+        """
+        ta funkcja zwraca backgroundowy obiekt Surface, tj.
+        wylicza wymiary mapy i wrzuca podloge oraz sciany w
+        return image
+        """
         
         #wall = self.is_wall
         
@@ -71,25 +88,27 @@ class Level:
 
         image = pygame.Surface((self.width*MAP_TILE_WIDTH, self.height*MAP_TILE_HEIGHT))
         
-        overlays = {}
+        #overlays = {}
         
 
         for map_y, line in enumerate(self.map): # mapy_y to numer linii, line to wektorek znakow
             for map_x, c in enumerate(line):
-                if self.get_tile(map_x, map_y)['name'] == 'floor':
-                    tile = 0
+                if self.get_tile(map_x, map_y)['name'] == 'wall':
+                    tile = 1
                 else:
+                    tile = 0
                     if self.get_tile(map_x, map_y)['name'] == 'player':
-                        overlays[(map_x, map_y)] = tiles[2]
-                    else:
-                        tile = 1
+                        _gracz_startpos = (map_x, map_y)
+                        
                 
                 tile_image = tiles[tile]
 
                 image.blit(tile_image, (map_x*MAP_TILE_WIDTH, map_y*MAP_TILE_HEIGHT))
                 
-        return image, overlays
+        return image, _gracz_startpos
 
+        
+    #def render_objects(self)
             
         
         
@@ -107,28 +126,44 @@ if __name__ == "__main__":
     
     
     
-    background, overlay_dict = level.render()
+    #background, overlay_dict = level.render()
+    background, gracz_startpos = level.render_background()
     
-    overlays = pygame.sprite.RenderUpdates()
     
-    for (x,y), image in overlay_dict.items(): # iteritems():
-        overlay = pygame.sprite.Sprite(overlays)
-        overlay.image= image
-        overlay.rect = image.get_rect().move(x * 64, y * 64) # - 64)
+    #---------
+    # STARAM SIE ZROBIC SPRITE - gracz
+    allgroup = pygame.sprite.Group()
+    
+    gracz1 = Gracz()
+    gracz1.add(allgroup)
+    
+    gracz1.rect = gracz1.rect.move(gracz_startpos[0]*64, gracz_startpos[1]*64)
+    
+    #----------
+    
+    
+    #overlays = pygame.sprite.RenderUpdates()
+    
+#==============================================================================
+#     for (x,y), image in overlay_dict.items(): # iteritems():
+#         overlay = pygame.sprite.Sprite(overlays)
+#         overlay.image= image
+#         overlay.rect = image.get_rect().move(x * 64, y * 64) # - 64)
+#==============================================================================
         
     screen.blit(background, (0,0))
-    overlays.draw(screen)
+    allgroup.draw(screen)
 
     pygame.display.flip()
     
-    game_over = False
+    game_over = True
         
-    while not game_over:
-        overlays.draw(screen)
+    while game_over:
+        #overlays.draw(screen)
         pygame.display.flip()
         clock.tick(15)
         for event in pygame.event.get():
             if event.type == pygame.locals.QUIT:
-                game_over = True
+                game_over = False
             elif event.type == pygame.locals.KEYDOWN:
                 pressed_key = event.key
