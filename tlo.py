@@ -53,56 +53,36 @@ class Level:
         return self.get_bool(x, y, 'wall')
         
         
-    def is_blocking(self, x, y):
-        if not 0 <= x <= self.width or not 0 <= y <= self.height:
-            return True
-        return self.get_bool(x, y, 'block')
-        
+#==============================================================================
+#     def is_blocking(self, x, y):
+#         if not 0 <= x <= self.width or not 0 <= y <= self.height:
+#             return True
+#         return self.get_bool(x, y, 'block')
+#==============================================================================
+
         
     def render(self):
-        wall = self.is_wall
+        
+        #wall = self.is_wall
         
         MAP_TILE_WIDTH, MAP_TILE_HEIGHT = 64, 64
-        tiles = [pygame.image.load('player.png'), pygame.image.load('block_01.png')]
+        tiles = [pygame.image.load('ground_06.png'), pygame.image.load('block_01.png'),
+                 pygame.image.load('player.png')]
 
         image = pygame.Surface((self.width*MAP_TILE_WIDTH, self.height*MAP_TILE_HEIGHT))
         
         overlays = {}
+        
 
         for map_y, line in enumerate(self.map): # mapy_y to numer linii, line to wektorek znakow
             for map_x, c in enumerate(line):
-                if wall(map_x, map_y):
-                    if not wall(map_x, map_y+1):
-                        if wall(map_x+1, map_y) and wall(map_x-1, map_y):
-                            tile = 1
-                        elif wall(map_x+1, map_y):
-                            tile = 0
-                        elif wall(map_x-1, map_y):
-                            tile = 0
-                        else:
-                            tile = 1
-                    else:
-                        if wall(map_x+1, map_y+1) and wall(map_x-1, map_y+1):
-                            tile = 0
-                        elif wall(map_x+1, map_y+1):
-                            tile = 1
-                        elif wall(map_x-1, map_y+1):
-                            tile = 0
-                        else:
-                            tile = 0
-                    # Add overlays if the wall may be obscuring something
-                    if not wall(map_x, map_y-1):
-                        if wall(map_x+1, map_y) and wall(map_x-1, map_y):
-                            over = 1
-                        elif wall(map_x+1, map_y):
-                            over = 0
-                        elif wall(map_x-1, map_y):
-                            over = 0
-                        else:
-                            over = 1
-                        overlays[(map_x, map_y)] = tiles[over]
-                else:
+                if self.get_tile(map_x, map_y)['name'] == 'floor':
                     tile = 0
+                else:
+                    if self.get_tile(map_x, map_y)['name'] == 'player':
+                        overlays[(map_x, map_y)] = tiles[2]
+                    else:
+                        tile = 1
                 
                 tile_image = tiles[tile]
 
@@ -134,7 +114,7 @@ if __name__ == "__main__":
     for (x,y), image in overlay_dict.items(): # iteritems():
         overlay = pygame.sprite.Sprite(overlays)
         overlay.image= image
-        overlay.rect = image.get_rect().move(x * 64, y * 64 - 64)
+        overlay.rect = image.get_rect().move(x * 64, y * 64) # - 64)
         
     screen.blit(background, (0,0))
     overlays.draw(screen)
