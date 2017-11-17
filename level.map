@@ -1,0 +1,18 @@
+[level]
+#tileset = player.png
+map = ..........
+      .#####.##.
+      .#...#..#.
+      .#...####.
+      .##.##....
+      ..........
+
+[.]
+name = floor
+tile = 0
+
+[#]
+name = wall
+tile = 1
+wall = true
+block = true
