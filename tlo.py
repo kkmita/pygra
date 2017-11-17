@@ -14,10 +14,15 @@ import sys
 
 class Gracz(pygame.sprite.Sprite):
     
-    def __init__(self):
+    def __init__(self, xpos, ypos):
         pygame.sprite.Sprite.__init__(self) #Self.groups?
         self.image = pygame.image.load('player.png')
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(x = xpos, y = ypos)
+        
+        
+    def move(self, xmove, ymove):
+        self.rect.move_ip(xmove, ymove)
+        
 
 
 
@@ -134,10 +139,11 @@ if __name__ == "__main__":
     # STARAM SIE ZROBIC SPRITE - gracz
     allgroup = pygame.sprite.Group()
     
-    gracz1 = Gracz()
+    gracz1 = Gracz(xpos = gracz_startpos[0]*64, ypos = gracz_startpos[1]*64)
     gracz1.add(allgroup)
     
-    gracz1.rect = gracz1.rect.move(gracz_startpos[0]*64, gracz_startpos[1]*64)
+    
+    #gracz1.rect = gracz1.rect.move(gracz_startpos[0]*64, gracz_startpos[1]*64)
     
     #----------
     
@@ -161,9 +167,31 @@ if __name__ == "__main__":
     while game_over:
         #overlays.draw(screen)
         pygame.display.flip()
-        clock.tick(15)
+        clock.tick(55)
         for event in pygame.event.get():
             if event.type == pygame.locals.QUIT:
                 game_over = False
+                pygame.quit()
+                sys.exit()
             elif event.type == pygame.locals.KEYDOWN:
-                pressed_key = event.key
+                #pressed_key = event.key
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_DOWN]:
+                    gracz1.move(0,64)
+                elif keys[pygame.K_UP]:
+                    gracz1.move(0,-64)
+                elif keys[pygame.K_RIGHT]:
+                    gracz1.move(64,0)
+                elif keys[pygame.K_LEFT]:
+                    gracz1.move(-64,0)
+            allgroup.clear(screen, background)
+            allgroup.draw(screen)
+                
+                
+                
+                
+                
+                
+                
+                
+                
