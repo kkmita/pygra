@@ -21,7 +21,7 @@ class IsoGame:
         
         def __init__(self, xpos, ypos):
             pygame.sprite.Sprite.__init__(self) #Self.groups?
-            self.image = pygame.image.load(os.path.join('../pictures','player.png'))
+            self.image = pygame.image.load(os.path.join('pictures','player.png'))
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
@@ -92,7 +92,7 @@ class IsoGame:
     #==============================================================================
     
             
-        def render_background(self):
+        def render_background(self, tiles):
             
             
             """
@@ -105,8 +105,10 @@ class IsoGame:
             
             MAP_TILE_WIDTH, MAP_TILE_HEIGHT = 64, 64
             
-            tiles = [pygame.image.load(os.path.join('../pictures', 'ground_06.png')), 
-                     pygame.image.load(os.path.join('../pictures', 'block_01.png')) ]
+#==============================================================================
+#             tiles = [pygame.image.load(os.path.join('../pictures', 'ground_06.png')), 
+#                      pygame.image.load(os.path.join('../pictures', 'block_01.png')) ]
+#==============================================================================
      
     
             image = pygame.Surface((self.width*MAP_TILE_WIDTH, self.height*MAP_TILE_HEIGHT))
@@ -149,14 +151,21 @@ class IsoGame:
         self.screen = pygame.display.set_mode((1600, 1000))
 
         self.level = self.Level()
-        #self.level.load_file()
+ 
         self.sciezka_nazw = os.path.join("pyfiles","level.map")
+        #self.sciezka_nazw = "level.map"
         self.level.load_file(self.sciezka_nazw)
         
         self.clock = pygame.time.Clock()
         
         
-        self.background, self.gracz_startpos = self.level.render_background()
+        
+        #proba ufunkcjonowienia backgroundu
+        self.tiles = [pygame.image.load(os.path.join('pictures', 'ground_06.png')), 
+                      pygame.image.load(os.path.join('pictures', 'block_01.png')) ]
+        
+        
+        self.background, self.gracz_startpos = self.level.render_background(self.tiles)
         
         self.allgroup = pygame.sprite.Group()
         
