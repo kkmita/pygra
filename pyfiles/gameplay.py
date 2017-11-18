@@ -5,6 +5,7 @@ Created on Fri Nov 17 14:45:49 2017
 
 @author: kamil
 """
+
 import pygame
 import pygame.locals
 import configparser
@@ -14,6 +15,17 @@ import os
 
 class IsoGame:
     
+    
+    class Tekst(pygame.sprite.Sprite):
+        def __init__(self, xpos, ypos, text, size, width, height):
+            pygame.sprite.Sprite.__init__(self)
+            self.font = pygame.font.SysFont("Arial", size)
+            self.textSurf = self.font.render(text, 1, (255, 255, 0))
+            self.image = pygame.Surface((width, height))
+            W = self.textSurf.get_width()
+            H = self.textSurf.get_height()
+            self.image.blit(self.textSurf, [width/2 - W/2, height/2 - H/2])
+            self.rect = self.image.get_rect(x = xpos, y = ypos)
     
     
     class Gracz(pygame.sprite.Sprite):
@@ -102,11 +114,19 @@ class IsoGame:
             pygame.sprite.Sprite.__init__(self)
             self.image = pygame.image.load(os.path.join('pictures', 'block_01.png'))
             self.rect = self.image.get_rect(x = xpos, y = ypos)
+            
+            
+    class Goal(pygame.sprite.Sprite):
+        
+        def __init__(self, xpos, ypos):
+            pygame.sprite.Sprite.__init__(self)
+            self.image = pygame.image.load(os.path.join('pictures', 'ground_03.png'))
+            self.rect = self.image.get_rect(x = xpos, y = ypos)
     
     
     class Level:
         
-        def load_file(self, filename = "pyfiles/ level.map"):
+        def load_file(self, filename = "pyfiles/level.map"):
             self.map = []
             self.key = {}
             try:
@@ -193,6 +213,8 @@ class IsoGame:
                 for map_x, c in enumerate(line):
                     if self.get_tile(map_x, map_y)['name'] == 'wall':
                         tile = 1
+                    elif self.get_tile(map_x, map_y)['name'] == 'goal':
+                        tile = 2
                     else:
                         tile = 0
                         
@@ -207,6 +229,7 @@ class IsoGame:
         def render_objects(self):
             
             walls = []
+            goals = []
             boxes_startpos = []
             
             for map_y, line in enumerate(self.map): # mapy_y to numer linii, line to wektorek znakow
@@ -215,10 +238,12 @@ class IsoGame:
                         walls.append((map_x, map_y))
                     elif self.get_tile(map_x, map_y)['name'] == 'box':
                         boxes_startpos.append((map_x, map_y))
+                    elif self.get_tile(map_x, map_y)['name'] == 'goal':
+                        goals.append((map_x, map_y))
                     elif self.get_tile(map_x, map_y)['name'] == 'player':
                         _gracz_startpos = (map_x, map_y)
 
-            return _gracz_startpos, boxes_startpos, walls
+            return _gracz_startpos, boxes_startpos, walls, goals
             
         
     
@@ -227,6 +252,11 @@ class IsoGame:
     def __init__(self):
         pygame.init()
         #screen = pygame.display.set_mode((100,100))
+        
+        
+        # ustawienie textu
+
+        
         
         
         # zmienne - szerokosc/wysokosc obiektow
@@ -268,7 +298,8 @@ class IsoGame:
         # tworzymy obiekt BACKGROUND
         
         self.tiles = [pygame.image.load(os.path.join('pictures', 'ground_06.png')), 
-                      pygame.image.load(os.path.join('pictures', 'block_01.png')) ]
+                      pygame.image.load(os.path.join('pictures', 'block_01.png')),
+                      pygame.image.load(os.path.join('pictures', 'ground_03.png'))]
 
         tiles = self.tiles
 
@@ -281,7 +312,7 @@ class IsoGame:
         self.background = self.level.render_background(self.tiles)
         background = self.background
 
-        gracz_startpos, boxes_startpos, walls = level.render_objects()
+        gracz_startpos, boxes_startpos, walls_pos, goals_pos = level.render_objects()
 
         
         # grupy spriteow
@@ -289,9 +320,11 @@ class IsoGame:
         self.allgroup = pygame.sprite.Group()
         self.boxgroup = pygame.sprite.Group()
         self.wallsgroup = pygame.sprite.Group()
+        self.goalsgroup = pygame.sprite.Group()
+        self.Tekstgroup = pygame.sprite.Group()
         
         global wallsgroup
-        allgroup, boxgroup, wallsgroup = self.allgroup, self.boxgroup, self.wallsgroup
+        allgroup, boxgroup, wallsgroup, goalsgroup = self.allgroup, self.boxgroup, self.wallsgroup, self.goalsgroup
         
         
         # tworzymy gracza
@@ -322,26 +355,33 @@ class IsoGame:
         
         self.walls = []
     
-        for i in range(len(walls)):
-            self.walls.append(self.Wall(xpos = walls[i][0]*64,
-                                        ypos = walls[i][1]*64))
+        for i in range(len(walls_pos)):
+            self.walls.append(self.Wall(xpos = walls_pos[i][0]*64,
+                                        ypos = walls_pos[i][1]*64))
             
             self.walls[i].add(wallsgroup)
-    
-#==============================================================================
-#         self.pudlo1 = self.Pudlo(xpos = boxes_startpos[0][0]*64,
-#                                      ypos = boxes_startpos[0][1]*64)
-#         
-#         self.pudlo2 = self.Pudlo(xpos = boxes_startpos[1][0]*64,
-#                                     ypos = boxes_startpos[1][1]*64)
-#         
-#         self.pudlo1.add(self.boxgroup)
-#         self.pudlo2.add(self.boxgroup)
-#==============================================================================
+            
+            
+        # tworzymy cele
         
+        self.goals = []
+            
+        for i in range(len(goals_pos)):
+            self.goals.append(self.Goal(xpos = goals_pos[i][0]*64,
+                                        ypos = goals_pos[i][1]*64))
+            
+            self.walls[i].add(goalsgroup)        
+
+            
         # ustawienia tla
         
+        self.font = pygame.font.SysFont("comicsansms", 72)
+        #self.label = self.font.render("Zabawa", 1, (255, 255, 0))
+        
+        
+        
         screen.blit(background, (0, 0))
+
         allgroup.draw(screen)
         boxgroup.draw(screen)
         
@@ -407,51 +447,47 @@ class IsoGame:
                             z.move(-64, 0, self.background.get_rect())     
                             if z.rect.center == _czy_move:
                                 self.gracz1.move(64, 0, self.background.get_rect())                            
-                        
+                
+                # wyrysowanie wszystkiego z for-a
+                
+#==============================================================================
+#                 goals_number = len(pygame.sprite.groupcollide(self.goalsgroup,
+#                     self.boxgroup, False, False))
+#==============================================================================
+                count = 0
+                for j in range(len(self.goals)):
+                    if pygame.sprite.spritecollideany(self.goals[j], self.boxgroup) != None:
+                        count += 1
+                
+                if count == 2:
+                    pygame.quit()
+                    exec(open(os.path.join('pyfiles', 'gamelevel.py')).read())
+                    
+
+                
+                Tekst_inst = self.Tekst(650, 10, "goli "+str(count), 10, 60, 60)
+                Tekst_inst.add(self.Tekstgroup)
+                                                                                            
                 self.allgroup.clear(self.screen, self.background)
                 self.boxgroup.clear(self.screen, self.background)
+                self.Tekstgroup.clear(self.screen, self.background)
+                
                 self.boxgroup.draw(self.screen)
-                self.allgroup.draw(self.screen)       
+                self.allgroup.draw(self.screen)
+                self.Tekstgroup.draw(self.screen)
+                
+                Tekst_inst.kill()
+                
                 #self.boxgroup.draw(self.screen)
+                
+
+                                                 
+
                     
 if __name__ == '__main__':
     IsoGame()                   
                     
                     
-#==============================================================================
-#     screen.blit(background, (0,0))
-#     allgroup.draw(screen)
-# 
-#     pygame.display.flip()
-#     
-#     game_over = True
-#         
-#     while game_over:
-#         #overlays.draw(screen)
-#         pygame.display.flip()
-#         clock.tick(55)
-#         for event in pygame.event.get():
-#             if event.type == pygame.locals.QUIT:
-#                 game_over = False
-#                 pygame.quit()
-#                 sys.exit()
-#             elif event.type == pygame.locals.KEYDOWN:
-#                 #pressed_key = event.key
-#                 keys = pygame.key.get_pressed()
-#                 if keys[pygame.K_DOWN]:
-#                     gracz1.move(0,64)
-#                 elif keys[pygame.K_UP]:
-#                     gracz1.move(0,-64)
-#                 elif keys[pygame.K_RIGHT]:
-#                     gracz1.move(64,0)
-#                 elif keys[pygame.K_LEFT]:
-#                     gracz1.move(-64,0)
-#             allgroup.clear(screen, background)
-#             allgroup.draw(screen)
-#==============================================================================
-                
-                
-                
                 
                 
                 

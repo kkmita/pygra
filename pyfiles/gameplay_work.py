@@ -486,34 +486,3 @@ if __name__ == '__main__':
     IsoGame()                   
                     
                     
-#==============================================================================
-#     screen.blit(background, (0,0))
-#     allgroup.draw(screen)
-# 
-#     pygame.display.flip()
-#     
-#     game_over = True
-#         
-#     while game_over:
-#         #overlays.draw(screen)
-#         pygame.display.flip()
-#         clock.tick(55)
-#         for event in pygame.event.get():
-#             if event.type == pygame.locals.QUIT:
-#                 game_over = False
-#                 pygame.quit()
-#                 sys.exit()
-#             elif event.type == pygame.locals.KEYDOWN:
-#                 #pressed_key = event.key
-#                 keys = pygame.key.get_pressed()
-#                 if keys[pygame.K_DOWN]:
-#                     gracz1.move(0,64)
-#                 elif keys[pygame.K_UP]:
-#                     gracz1.move(0,-64)
-#                 elif keys[pygame.K_RIGHT]:
-#                     gracz1.move(64,0)
-#                 elif keys[pygame.K_LEFT]:
-#                     gracz1.move(-64,0)
-#             allgroup.clear(screen, background)
-#             allgroup.draw(screen)
-#==============================================================================

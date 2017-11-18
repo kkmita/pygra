@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov 17 20:49:59 2017
+Created on Sat Nov 18 22:35:04 2017
 
 @author: kamil
 """
@@ -9,14 +9,14 @@ Created on Fri Nov 17 20:49:59 2017
 import pygame
 import pygame.locals
 import os
-import sys
 import configparser
+import sys
 
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((1000, 800))
-    pygame.display.set_caption('Gra Sokoban')
+    pygame.display.set_caption('Gra Sokoban - levele')
     
     background = pygame.Surface(screen.get_size())
     background = background.convert()
@@ -25,10 +25,10 @@ def main():
     font = pygame.font.SysFont("comicsansms", 72)
     
     
-    captions = ["Play", "Quit"]
-    buttons = [0, 0]
+    captions = ["lvl1", "lvl2"]
+    buttons = ['', '']
 
-    for i in range(1):
+    for i in range(2):
         buttons[i] = font.render(captions[i], 1, (10, 10, 10))
         background.blit(buttons[i], (50, 100+100*i))
         
@@ -48,12 +48,12 @@ def main():
             elif event.type == pygame.locals.KEYDOWN:
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_RETURN]:
-                    exec(open(os.path.join('pyfiles', 'gamelevel.py')).read())
+                    exec(open(os.path.join('pyfiles', 'gameplay.py')).read())
                 
 #==============================================================================
 #         keys = pygame.key.get_pressed()
 #         if keys[pygame.K_RETURN]:
-#             exec(open(os.path.join('pyfiles', 'gamelevel.py')).read())
+#             exec(open(os.path.join('gameplay.py')).read())
 #==============================================================================
                 
                 
