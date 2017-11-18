@@ -147,19 +147,30 @@ class IsoGame:
                         tile = 1
                     else:
                         tile = 0
-                        if self.get_tile(map_x, map_y)['name'] == 'player':
-                            _gracz_startpos = (map_x, map_y)
-                        elif self.get_tile(map_x, map_y)['name'] == 'box':
-                            _pudlo_startpos = (map_x, map_y)                            
-                    
+                        
                     tile_image = tiles[tile]
     
                     image.blit(tile_image, (map_x*MAP_TILE_WIDTH, map_y*MAP_TILE_HEIGHT))
                     
-            return image, _gracz_startpos, _pudlo_startpos
+            return image
 
         
-    #def render_objects(self)
+
+        def render_objects(self):
+            
+            walls = []
+            boxes_startpos = []
+            
+            for map_y, line in enumerate(self.map): # mapy_y to numer linii, line to wektorek znakow
+                for map_x, c in enumerate(line):
+                    if self.get_tile(map_x, map_y)['name'] == 'wall':
+                        walls.append((map_x, map_y))
+                    elif self.get_tile(map_x, map_y)['name'] == 'box':
+                        boxes_startpos.append((map_x, map_y))
+                    elif self.get_tile(map_x, map_y)['name'] == 'player':
+                        _gracz_startpos = (map_x, map_y)
+
+            return _gracz_startpos, boxes_startpos, walls
             
         
     
@@ -214,9 +225,16 @@ class IsoGame:
         tiles = self.tiles
 
 
-        self.background, self.gracz_startpos, self.pudlo_startpos = self.level.render_background(self.tiles)
-        background, gracz_startpos, pudlo_startpos = self.background, self.gracz_startpos, self.pudlo_startpos
+#==============================================================================
+#         self.background, self.gracz_startpos, self.pudlo_startpos = self.level.render_background(self.tiles)
+#         background, gracz_startpos, pudlo_startpos = self.background, self.gracz_startpos, self.pudlo_startpos
+#==============================================================================
         
+        self.background = self.level.render_background(self.tiles)
+        background = self.background
+
+        gracz_startpos, boxes_startpos, walls = level.render_objects()
+
         
         # grupy spriteow
         
@@ -232,11 +250,31 @@ class IsoGame:
         
         gracz1.add(allgroup)
         
-        self.pudlo1 = self.Pudlo(xpos = pudlo_startpos[0]*64, ypos = pudlo_startpos[1]*64)
-        pudlo1 = self.pudlo1
+#!+++++++++++++++++++++++++++++++++++++++
+#!+++++++++++++++++++++++++++++++++++++++
+#!+++++++++++++++++++++++++++++++++++++++        
         
-        pudlo1.add(self.boxgroup)
+        
+        # tworzymy pudla
+        self.pudla = []
+        
+        for i in range(len(boxes_startpos)):            
+            self.pudla.append(self.Pudlo(xpos = boxes_startpos[i][0]*64, 
+                ypos = boxes_startpos[i][1]*64))
+        
+        
+            self.pudla[i].add(self.boxgroup)
     
+#==============================================================================
+#         self.pudlo1 = self.Pudlo(xpos = boxes_startpos[0][0]*64,
+#                                      ypos = boxes_startpos[0][1]*64)
+#         
+#         self.pudlo2 = self.Pudlo(xpos = boxes_startpos[1][0]*64,
+#                                     ypos = boxes_startpos[1][1]*64)
+#         
+#         self.pudlo1.add(self.boxgroup)
+#         self.pudlo2.add(self.boxgroup)
+#==============================================================================
         
         # ustawienia tla
         
