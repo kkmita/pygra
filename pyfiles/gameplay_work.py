@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov 17 14:45:49 2017
+Created on Sat Nov 18 13:10:30 2017
 
 @author: kamil
 """
+
 
 import pygame
 import pygame.locals
@@ -21,7 +22,7 @@ class IsoGame:
         
         def __init__(self, xpos, ypos):
             pygame.sprite.Sprite.__init__(self) #Self.groups?
-            self.image = pygame.image.load(os.path.join('pictures','player.png'))
+            self.image = pygame.image.load(os.path.join('../pictures','player.png'))
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
@@ -29,8 +30,13 @@ class IsoGame:
             self.rect.move_ip(xmove, ymove)
             
             
-        def czy_kolizja(self, grupa_pudlo):
-            lista_sprite = pygame.sprite.collide(player, grupa_pudlo, collided = None)
+        def czy_kolizja(self, grupa):
+            lista_sprite = pygame.sprite.spritecollide(self, grupa, dokill = False)
+            if len(lista_sprite) == 0:
+                return None
+            else:
+                return lista_sprite[0]
+            
             
             
             
@@ -38,7 +44,7 @@ class IsoGame:
         
         def __init__(self, xpos, ypos):
             pygame.sprite.Sprite.__init__(self)
-            self.image = pygame.image.load(os.path.join('pictures', 'crate_04.png'))
+            self.image = pygame.image.load(os.path.join('../pictures', 'crate_04.png'))
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
@@ -49,7 +55,7 @@ class IsoGame:
     
     class Level:
         
-        def load_file(self, filename = "pyfiles/ level.map"):
+        def load_file(self, filename = "level.map"):
             self.map = []
             self.key = {}
             try:
@@ -169,8 +175,8 @@ class IsoGame:
 
         self.level = self.Level()
  
-        self.sciezka_nazw = os.path.join("pyfiles","level.map")
-        #self.sciezka_nazw = "level.map"
+        #self.sciezka_nazw = os.path.join("pyfiles","level.map")
+        self.sciezka_nazw = "level.map"
         self.level.load_file(self.sciezka_nazw)
         
         self.clock = pygame.time.Clock()
@@ -178,8 +184,8 @@ class IsoGame:
         
         
         #proba ufunkcjonowienia backgroundu
-        self.tiles = [pygame.image.load(os.path.join('pictures', 'ground_06.png')), 
-                      pygame.image.load(os.path.join('pictures', 'block_01.png')) ]
+        self.tiles = [pygame.image.load(os.path.join('../pictures', 'ground_06.png')), 
+                      pygame.image.load(os.path.join('../pictures', 'block_01.png')) ]
         
         
         self.background, self.gracz_startpos, self.pudlo_startpos = self.level.render_background(self.tiles)
@@ -216,9 +222,17 @@ class IsoGame:
                     #pressed_key = event.key
                     keys = pygame.key.get_pressed()
                     if keys[pygame.K_DOWN]:
-                        self.gracz1.move(0,64)
-                        if pygame.sprite.spritecollideany(self.gracz1, self.boxgroup, collided = None) != None:
-                            self.gracz1.move(0,-64)
+#==============================================================================
+#                         self.gracz1.move(0,64)
+#                         if pygame.sprite.spritecollideany(self.gracz1, self.boxgroup, collided = None) != None:
+#                             self.gracz1.move(0,-64)
+#==============================================================================
+                        self.gracz1.move(0, 64)                        
+                        z = self.gracz1.czy_kolizja(self.boxgroup)
+                        if z == None:
+                            pass
+                        else:
+                            z.move(0, 64)
                     elif keys[pygame.K_UP]:
                         self.gracz1.move(0,-64)
                     elif keys[pygame.K_RIGHT]:
@@ -227,8 +241,9 @@ class IsoGame:
                         self.gracz1.move(-64,0)
                 self.allgroup.clear(self.screen, self.background)
                 self.boxgroup.clear(self.screen, self.background)
-                self.allgroup.draw(self.screen)       
                 self.boxgroup.draw(self.screen)
+                self.allgroup.draw(self.screen)       
+                #self.boxgroup.draw(self.screen)
                     
 if __name__ == '__main__':
     IsoGame()                   
@@ -265,12 +280,3 @@ if __name__ == '__main__':
 #             allgroup.clear(screen, background)
 #             allgroup.draw(screen)
 #==============================================================================
-                
-                
-                
-                
-                
-                
-                
-                
-                
