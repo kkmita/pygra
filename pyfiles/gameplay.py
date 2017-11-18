@@ -88,13 +88,7 @@ class IsoGame:
             else:
                 return lista_sprite[0]     
 
-#==============================================================================
-#         def czy_kolizja_box(self):
-#             if pygame.sprite.spritecollideany(self, self.groups().pop()) == None:
-#                 return None
-#             else:
-#                 return 1
-#==============================================================================
+
         def czy_kolizja_box(self):
             _grupa = self.groups().pop()
             self.remove(_grupa)
@@ -116,6 +110,7 @@ class IsoGame:
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
+            
     class Goal(pygame.sprite.Sprite):
         
         def __init__(self, xpos, ypos):
@@ -124,27 +119,19 @@ class IsoGame:
             self.rect = self.image.get_rect(x = xpos, y = ypos)
     
     
+            
     class Level:
         
-        def load_file(self, filename = "pyfiles/level.map"):
+        def load_file(self, filename):
+            
             self.map = []
             self.key = {}
-            try:
-                parser = configparser.ConfigParser()
-            except ValueError:
-                print("TO TU")
-            try:
-                parser.read(filename)
-            except ValueError:
-                print("TO TU 2")
-            
-            #self.tileset = parser.get("level", "tileset")
-            try:
-                self.map = parser.get("level", "map").split("\n")
-            except ValueError:
-                print("OOO")
-            else:
-                print("DUPA")
+
+            parser = configparser.ConfigParser()
+            parser.read(filename)
+
+            self.map = parser.get("level", "map").split("\n")
+
             
             for section in parser.sections():
                 if len(section) == 1:
@@ -166,44 +153,16 @@ class IsoGame:
                 return {}
     
     
-        # name to NAME:VALUE z pliku konfiguracyjnego
-        # patrzymy, czy wartosc zwrocona przez name zawiera sie w danym zbiorze
-        def get_bool(self, x, y, name):
-            value = self.get_tile(x, y).get(name)
-            return value in (True, 1, 'true', 'yes', 'True', 'Yes', '1', 'on', 'On')
-            
-        
-        def is_wall(self, x, y):
-            return self.get_bool(x, y, 'wall')
-            
-            
-    #==============================================================================
-    #     def is_blocking(self, x, y):
-    #         if not 0 <= x <= self.width or not 0 <= y <= self.height:
-    #             return True
-    #         return self.get_bool(x, y, 'block')
-    #==============================================================================
-    
-            
+                    
         def render_background(self, tiles):
-            
-            
+                       
             """
             ta funkcja zwraca backgroundowy obiekt Surface, tj.
             wylicza wymiary mapy i wrzuca podloge oraz sciany w
             return image
             """
-            
-            #wall = self.is_wall
-            
-            MAP_TILE_WIDTH, MAP_TILE_HEIGHT = 64, 64
-            
-#==============================================================================
-#             tiles = [pygame.image.load(os.path.join('../pictures', 'ground_06.png')), 
-#                      pygame.image.load(os.path.join('../pictures', 'block_01.png')) ]
-#==============================================================================
-     
-    
+
+            MAP_TILE_WIDTH, MAP_TILE_HEIGHT = 64, 64    
             image = pygame.Surface((self.width*MAP_TILE_WIDTH, self.height*MAP_TILE_HEIGHT))
             
             #overlays = {}
@@ -247,7 +206,13 @@ class IsoGame:
             
         
     
- #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#   
+#===============================================================#
+#===============================================================#
+#                                                               #
+# KLASA IsoGame                      
+#                                                               #
+#===============================================================#
+#===============================================================#
     
     def __init__(self):
         pygame.init()
@@ -268,19 +233,26 @@ class IsoGame:
         self.screen = pygame.display.set_mode((1600, 1000))
         screen = self.screen
 
-        
+
+#!+++++++++++++++++++++++++++++++++++++++
+#!+++++++++++++++++++++++++++++++++++++++
+#!+++++++++++++++++++++++++++++++++++++++ 
+
         # budowa obietku Level
         
         self.level = self.Level()
         level = self.level
  
-        self.sciezka_nazwa = os.path.join("pyfiles","level.map")
-        #self.sciezka_nazw = "level.map"
-        #self.level.load_file(self.sciezka_nazw)
+        #self.sciezka_nazwa = os.path.join("pyfiles","level.map")
+        self.sciezka_nazwa = os.path.join("pyfiles",path)
+
         
-        #self.sciezka_nazwa = "level.map"
         level.load_file(self.sciezka_nazwa)
         
+        
+#!+++++++++++++++++++++++++++++++++++++++
+#!+++++++++++++++++++++++++++++++++++++++
+#!+++++++++++++++++++++++++++++++++++++++         
         
         # zegar
         self.clock = pygame.time.Clock()
@@ -304,10 +276,6 @@ class IsoGame:
         tiles = self.tiles
 
 
-#==============================================================================
-#         self.background, self.gracz_startpos, self.pudlo_startpos = self.level.render_background(self.tiles)
-#         background, gracz_startpos, pudlo_startpos = self.background, self.gracz_startpos, self.pudlo_startpos
-#==============================================================================
         
         self.background = self.level.render_background(self.tiles)
         background = self.background
@@ -333,10 +301,7 @@ class IsoGame:
         gracz1 = self.gracz1
         
         gracz1.add(allgroup)
-        
-#!+++++++++++++++++++++++++++++++++++++++
-#!+++++++++++++++++++++++++++++++++++++++
-#!+++++++++++++++++++++++++++++++++++++++        
+               
         
         
         # tworzymy pudla

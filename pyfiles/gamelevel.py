@@ -39,6 +39,20 @@ def main():
     
     
     
+    # funkcja zmieniajaca levele
+    def change_button(updown):
+        if updown == "down":
+            if active_button < 1:
+                return (active_button+1)
+        else:
+            if active_button > 0:
+                return (active_button-1)
+        
+    
+    
+    
+    
+    
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -47,16 +61,22 @@ def main():
                 return
             elif event.type == pygame.locals.KEYDOWN:
                 keys = pygame.key.get_pressed()
-                if keys[pygame.K_RETURN]:
-                    exec(open(os.path.join('pyfiles', 'gameplay.py')).read())
-                
-#==============================================================================
-#         keys = pygame.key.get_pressed()
-#         if keys[pygame.K_RETURN]:
-#             exec(open(os.path.join('gameplay.py')).read())
-#==============================================================================
-                
-                
+                if keys[pygame.K_DOWN]:
+                    active_button = change_button("down")
+                elif keys[pygame.K_UP]:
+                    active_button = change_button("up")
+                elif keys[pygame.K_RETURN]:
+                    globalsv = {"path": "level.map"}
+                    global path
+                    path = "level.map"
+                    exec(open(os.path.join('pyfiles', 'gameplay.py')).read(), globals())
+
+        screen.blit(background, (0,0))
+        
+        buttons[active_button] = font.render(captions[active_button], 1, (250,10,255))
+        
+        screen.blit(buttons[active_button], (50,100+100*active_button))
+                    
         pygame.display.flip()
         
 if __name__ == '__main__':
