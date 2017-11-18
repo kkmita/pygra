@@ -26,8 +26,11 @@ class IsoGame:
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
-        def move(self, xmove, ymove):
+        def move(self, xmove, ymove, somescreen):
+            # sprawdz czy nie trafiasz w ograniczenia
             self.rect.move_ip(xmove, ymove)
+            if self.rect.bottom > somescreen.bottom:
+                self.rect.move_ip(-xmove, -ymove)
             
             
         def czy_kolizja(self, grupa):
@@ -170,6 +173,10 @@ class IsoGame:
         #ustawienia mapek i tak dalej
         self.MAP_TILE_WIDTH, self.MAP_TILE_HEIGHT = 64, 64
         
+        
+        
+        
+        
         #ustawienie buforu na grafike
         self.screen = pygame.display.set_mode((1600, 1000))
 
@@ -180,6 +187,12 @@ class IsoGame:
         self.level.load_file(self.sciezka_nazw)
         
         self.clock = pygame.time.Clock()
+        
+        
+        #graniczne punkty
+        self.granica_y_dol = self.level.height * self.MAP_TILE_HEIGHT
+        self.granica_x_prawo = self.level.width * self.MAP_TILE_WIDTH
+        
         
         
         
@@ -222,23 +235,18 @@ class IsoGame:
                     #pressed_key = event.key
                     keys = pygame.key.get_pressed()
                     if keys[pygame.K_DOWN]:
-#==============================================================================
-#                         self.gracz1.move(0,64)
-#                         if pygame.sprite.spritecollideany(self.gracz1, self.boxgroup, collided = None) != None:
-#                             self.gracz1.move(0,-64)
-#==============================================================================
-                        self.gracz1.move(0, 64)                        
+                        self.gracz1.move(0, 64, self.background.get_rect())                        
                         z = self.gracz1.czy_kolizja(self.boxgroup)
                         if z == None:
                             pass
                         else:
                             z.move(0, 64)
                     elif keys[pygame.K_UP]:
-                        self.gracz1.move(0,-64)
+                        self.gracz1.move(0,-64, self.background.get_rect())
                     elif keys[pygame.K_RIGHT]:
-                        self.gracz1.move(64,0)
+                        self.gracz1.move(64,0, self.background.get_rect())
                     elif keys[pygame.K_LEFT]:
-                        self.gracz1.move(-64,0)
+                        self.gracz1.move(-64,0, self.background.get_rect())
                 self.allgroup.clear(self.screen, self.background)
                 self.boxgroup.clear(self.screen, self.background)
                 self.boxgroup.draw(self.screen)
