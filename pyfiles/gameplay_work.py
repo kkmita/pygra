@@ -170,51 +170,79 @@ class IsoGame:
         #screen = pygame.display.set_mode((100,100))
         
         
-        #ustawienia mapek i tak dalej
+        # zmienne - szerokosc/wysokosc obiektow
         self.MAP_TILE_WIDTH, self.MAP_TILE_HEIGHT = 64, 64
+        MAP_TILE_WIDTH, MAP_TILE_HEIGHT = self.MAP_TILE_WIDTH, self.MAP_TILE_HEIGHT
         
         
-        
-        
-        
-        #ustawienie buforu na grafike
+        # ustawienie buforu na grafike
         self.screen = pygame.display.set_mode((1600, 1000))
+        screen = self.screen
 
+        
+        # budowa obietku Level
+        
         self.level = self.Level()
+        level = self.level
  
         #self.sciezka_nazw = os.path.join("pyfiles","level.map")
-        self.sciezka_nazw = "level.map"
-        self.level.load_file(self.sciezka_nazw)
+        #self.sciezka_nazw = "level.map"
+        #self.level.load_file(self.sciezka_nazw)
         
+        self.sciezka_nazwa = "level.map"
+        level.load_file(self.sciezka_nazwa)
+        
+        
+        # zegar
         self.clock = pygame.time.Clock()
         
         
         #graniczne punkty
-        self.granica_y_dol = self.level.height * self.MAP_TILE_HEIGHT
-        self.granica_x_prawo = self.level.width * self.MAP_TILE_WIDTH
+        self.bound_y_d = self.level.height * self.MAP_TILE_HEIGHT
+        self.bound_x_p = self.level.width * self.MAP_TILE_WIDTH
+        
+        bound_y_d, bound_x_p = self.bound_y_d, self.bound_x_p
         
         
         
         
-        #proba ufunkcjonowienia backgroundu
+        # tworzymy obiekt BACKGROUND
+        
         self.tiles = [pygame.image.load(os.path.join('../pictures', 'ground_06.png')), 
                       pygame.image.load(os.path.join('../pictures', 'block_01.png')) ]
-        
-        
+
+        tiles = self.tiles
+
+
         self.background, self.gracz_startpos, self.pudlo_startpos = self.level.render_background(self.tiles)
+        background, gracz_startpos, pudlo_startpos = self.background, self.gracz_startpos, self.pudlo_startpos
+        
+        
+        # grupy spriteow
         
         self.allgroup = pygame.sprite.Group()
         self.boxgroup = pygame.sprite.Group()
+        allgroup, boxgroup = self.allgroup, self.boxgroup
         
-        self.gracz1 = self.Gracz(xpos = self.gracz_startpos[0]*64, ypos = self.gracz_startpos[1]*64)
-        self.gracz1.add(self.allgroup)
         
-        self.pudlo1 = self.Pudlo(xpos = self.pudlo_startpos[0]*64, ypos = self.pudlo_startpos[1]*64)
-        self.pudlo1.add(self.boxgroup)
+        # tworzymy gracza
+        
+        self.gracz1 = self.Gracz(xpos = gracz_startpos[0]*64, ypos = gracz_startpos[1]*64)
+        gracz1 = self.gracz1
+        
+        gracz1.add(allgroup)
+        
+        self.pudlo1 = self.Pudlo(xpos = pudlo_startpos[0]*64, ypos = pudlo_startpos[1]*64)
+        pudlo1 = self.pudlo1
+        
+        pudlo1.add(self.boxgroup)
     
-        self.screen.blit(self.background, (0, 0))
-        self.allgroup.draw(self.screen)
-        self.boxgroup.draw(self.screen)
+        
+        # ustawienia tla
+        
+        screen.blit(background, (0, 0))
+        allgroup.draw(screen)
+        boxgroup.draw(screen)
         
         pygame.display.flip()
     
@@ -247,6 +275,7 @@ class IsoGame:
                         self.gracz1.move(64,0, self.background.get_rect())
                     elif keys[pygame.K_LEFT]:
                         self.gracz1.move(-64,0, self.background.get_rect())
+                        
                 self.allgroup.clear(self.screen, self.background)
                 self.boxgroup.clear(self.screen, self.background)
                 self.boxgroup.draw(self.screen)
