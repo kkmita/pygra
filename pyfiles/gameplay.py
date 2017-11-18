@@ -425,6 +425,20 @@ class IsoGame:
                         count += 1
                 
                 if count == 2:
+                    Tekst_inst = self.Tekst(650, 10, "goli "+str(count), 10, 60, 60)
+                    Tekst_inst.add(self.Tekstgroup)
+                                                                                                
+                    self.allgroup.clear(self.screen, self.background)
+                    self.boxgroup.clear(self.screen, self.background)
+                    self.Tekstgroup.clear(self.screen, self.background)
+                    
+                    self.boxgroup.draw(self.screen)
+                    self.allgroup.draw(self.screen)
+                    self.Tekstgroup.draw(self.screen)
+                    
+                    Tekst_inst.kill()
+                    pygame.display.flip()
+                    pygame.time.wait(3000)
                     pygame.quit()
                     exec(open(os.path.join('pyfiles', 'gamelevel.py')).read())
                     

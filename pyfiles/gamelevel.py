@@ -66,9 +66,11 @@ def main():
                 elif keys[pygame.K_UP]:
                     active_button = change_button("up")
                 elif keys[pygame.K_RETURN]:
-                    globalsv = {"path": "level.map"}
                     global path
-                    path = "level.map"
+                    if active_button == 0:
+                        path = "level.map"
+                    elif active_button == 1:
+                        path = "level2.map"                        
                     exec(open(os.path.join('pyfiles', 'gameplay.py')).read(), globals())
 
         screen.blit(background, (0,0))
