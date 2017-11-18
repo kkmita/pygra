@@ -5,7 +5,6 @@ Created on Fri Nov 17 14:45:49 2017
 
 @author: kamil
 """
-
 import pygame
 import pygame.locals
 import configparser
@@ -25,12 +24,25 @@ class IsoGame:
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
-        def move(self, xmove, ymove):
+        def move(self, xmove, ymove, somescreen):
+            # sprawdz czy nie trafiasz w ograniczenia
             self.rect.move_ip(xmove, ymove)
+            if (self.rect.bottom > somescreen.bottom or
+                self.rect.right > somescreen.right or
+                self.rect.left < somescreen.left or
+                self.rect.top < somescreen.top):
+                self.rect.move_ip(-xmove, -ymove)
+            elif self.czy_kolizja(grupa=wallsgroup) != None:
+                self.rect.move_ip(-xmove, -ymove)
+
+                                        
+        def czy_kolizja(self, grupa):
+            lista_sprite = pygame.sprite.spritecollide(self, grupa, dokill = False)
+            if len(lista_sprite) == 0:
+                return None
+            else:
+                return lista_sprite[0]
             
-            
-        def czy_kolizja(self, grupa_pudlo):
-            lista_sprite = pygame.sprite.collide(player, grupa_pudlo, collided = None)
             
             
             
@@ -42,9 +54,54 @@ class IsoGame:
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
-        def move(self, xmove, ymove):
+        def move(self, xmove, ymove, somescreen):
             self.rect.move_ip(xmove, ymove)
+            if (self.rect.bottom > somescreen.bottom or
+                self.rect.right > somescreen.right or
+                self.rect.left < somescreen.left or
+                self.rect.top < somescreen.top):
+                self.rect.move_ip(-xmove, -ymove)                
+            elif self.czy_kolizja(grupa=wallsgroup) != None:
+                self.rect.move_ip(-xmove, -ymove)
+            #elif self.czy_kolizja(grupa=boxgroup) != None:
+            #    self.rect.move_ip(-xmove, -ymove)
+            elif self.czy_kolizja_box() != None:
+                self.rect.move_ip(-xmove, -ymove)
+
+                                        
+        def czy_kolizja(self, grupa):
+            lista_sprite = pygame.sprite.spritecollide(self, grupa, dokill = False)
+            if len(lista_sprite) == 0:
+                return None
+            else:
+                return lista_sprite[0]     
+
+#==============================================================================
+#         def czy_kolizja_box(self):
+#             if pygame.sprite.spritecollideany(self, self.groups().pop()) == None:
+#                 return None
+#             else:
+#                 return 1
+#==============================================================================
+        def czy_kolizja_box(self):
+            _grupa = self.groups().pop()
+            self.remove(_grupa)
+            if pygame.sprite.spritecollideany(self, _grupa) == None:
+                self.add(_grupa)
+                return None
+            else:
+                self.add(_grupa)
+                return 1
+           
             
+                
+                
+    class Wall(pygame.sprite.Sprite):
+        
+        def __init__(self, xpos, ypos):
+            pygame.sprite.Sprite.__init__(self)
+            self.image = pygame.image.load(os.path.join('pictures', 'block_01.png'))
+            self.rect = self.image.get_rect(x = xpos, y = ypos)
     
     
     class Level:
@@ -138,19 +195,30 @@ class IsoGame:
                         tile = 1
                     else:
                         tile = 0
-                        if self.get_tile(map_x, map_y)['name'] == 'player':
-                            _gracz_startpos = (map_x, map_y)
-                        elif self.get_tile(map_x, map_y)['name'] == 'box':
-                            _pudlo_startpos = (map_x, map_y)                            
-                    
+                        
                     tile_image = tiles[tile]
     
                     image.blit(tile_image, (map_x*MAP_TILE_WIDTH, map_y*MAP_TILE_HEIGHT))
                     
-            return image, _gracz_startpos, _pudlo_startpos
+            return image
 
         
-    #def render_objects(self)
+
+        def render_objects(self):
+            
+            walls = []
+            boxes_startpos = []
+            
+            for map_y, line in enumerate(self.map): # mapy_y to numer linii, line to wektorek znakow
+                for map_x, c in enumerate(line):
+                    if self.get_tile(map_x, map_y)['name'] == 'wall':
+                        walls.append((map_x, map_y))
+                    elif self.get_tile(map_x, map_y)['name'] == 'box':
+                        boxes_startpos.append((map_x, map_y))
+                    elif self.get_tile(map_x, map_y)['name'] == 'player':
+                        _gracz_startpos = (map_x, map_y)
+
+            return _gracz_startpos, boxes_startpos, walls
             
         
     
@@ -161,41 +229,121 @@ class IsoGame:
         #screen = pygame.display.set_mode((100,100))
         
         
-        #ustawienia mapek i tak dalej
+        # zmienne - szerokosc/wysokosc obiektow
         self.MAP_TILE_WIDTH, self.MAP_TILE_HEIGHT = 64, 64
+        MAP_TILE_WIDTH, MAP_TILE_HEIGHT = self.MAP_TILE_WIDTH, self.MAP_TILE_HEIGHT
         
-        #ustawienie buforu na grafike
+        
+        # ustawienie buforu na grafike
         self.screen = pygame.display.set_mode((1600, 1000))
+        screen = self.screen
 
-        self.level = self.Level()
- 
-        self.sciezka_nazw = os.path.join("pyfiles","level.map")
-        #self.sciezka_nazw = "level.map"
-        self.level.load_file(self.sciezka_nazw)
         
+        # budowa obietku Level
+        
+        self.level = self.Level()
+        level = self.level
+ 
+        self.sciezka_nazwa = os.path.join("pyfiles","level.map")
+        #self.sciezka_nazw = "level.map"
+        #self.level.load_file(self.sciezka_nazw)
+        
+        #self.sciezka_nazwa = "level.map"
+        level.load_file(self.sciezka_nazwa)
+        
+        
+        # zegar
         self.clock = pygame.time.Clock()
         
         
+        #graniczne punkty
+        self.bound_y_d = self.level.height * self.MAP_TILE_HEIGHT
+        self.bound_x_p = self.level.width * self.MAP_TILE_WIDTH
         
-        #proba ufunkcjonowienia backgroundu
+        bound_y_d, bound_x_p = self.bound_y_d, self.bound_x_p
+        
+        
+        
+        
+        # tworzymy obiekt BACKGROUND
+        
         self.tiles = [pygame.image.load(os.path.join('pictures', 'ground_06.png')), 
                       pygame.image.load(os.path.join('pictures', 'block_01.png')) ]
+
+        tiles = self.tiles
+
+
+#==============================================================================
+#         self.background, self.gracz_startpos, self.pudlo_startpos = self.level.render_background(self.tiles)
+#         background, gracz_startpos, pudlo_startpos = self.background, self.gracz_startpos, self.pudlo_startpos
+#==============================================================================
         
+        self.background = self.level.render_background(self.tiles)
+        background = self.background
+
+        gracz_startpos, boxes_startpos, walls = level.render_objects()
+
         
-        self.background, self.gracz_startpos, self.pudlo_startpos = self.level.render_background(self.tiles)
+        # grupy spriteow
         
         self.allgroup = pygame.sprite.Group()
         self.boxgroup = pygame.sprite.Group()
+        self.wallsgroup = pygame.sprite.Group()
         
-        self.gracz1 = self.Gracz(xpos = self.gracz_startpos[0]*64, ypos = self.gracz_startpos[1]*64)
-        self.gracz1.add(self.allgroup)
+        global wallsgroup
+        allgroup, boxgroup, wallsgroup = self.allgroup, self.boxgroup, self.wallsgroup
         
-        self.pudlo1 = self.Pudlo(xpos = self.pudlo_startpos[0]*64, ypos = self.pudlo_startpos[1]*64)
-        self.pudlo1.add(self.boxgroup)
+        
+        # tworzymy gracza
+        
+        self.gracz1 = self.Gracz(xpos = gracz_startpos[0]*64, ypos = gracz_startpos[1]*64)
+        gracz1 = self.gracz1
+        
+        gracz1.add(allgroup)
+        
+#!+++++++++++++++++++++++++++++++++++++++
+#!+++++++++++++++++++++++++++++++++++++++
+#!+++++++++++++++++++++++++++++++++++++++        
+        
+        
+        # tworzymy pudla
+        self.pudla = []
+        
+        for i in range(len(boxes_startpos)):            
+            self.pudla.append(self.Pudlo(xpos = boxes_startpos[i][0]*64, 
+                ypos = boxes_startpos[i][1]*64))
+        
+        
+            self.pudla[i].add(self.boxgroup)
+            
+            
+            
+        # tworzymy sciany
+        
+        self.walls = []
     
-        self.screen.blit(self.background, (0, 0))
-        self.allgroup.draw(self.screen)
-        self.boxgroup.draw(self.screen)
+        for i in range(len(walls)):
+            self.walls.append(self.Wall(xpos = walls[i][0]*64,
+                                        ypos = walls[i][1]*64))
+            
+            self.walls[i].add(wallsgroup)
+    
+#==============================================================================
+#         self.pudlo1 = self.Pudlo(xpos = boxes_startpos[0][0]*64,
+#                                      ypos = boxes_startpos[0][1]*64)
+#         
+#         self.pudlo2 = self.Pudlo(xpos = boxes_startpos[1][0]*64,
+#                                     ypos = boxes_startpos[1][1]*64)
+#         
+#         self.pudlo1.add(self.boxgroup)
+#         self.pudlo2.add(self.boxgroup)
+#==============================================================================
+        
+        # ustawienia tla
+        
+        screen.blit(background, (0, 0))
+        allgroup.draw(screen)
+        boxgroup.draw(screen)
         
         pygame.display.flip()
     
@@ -215,20 +363,56 @@ class IsoGame:
                 elif event.type == pygame.locals.KEYDOWN:
                     #pressed_key = event.key
                     keys = pygame.key.get_pressed()
+                    
                     if keys[pygame.K_DOWN]:
-                        self.gracz1.move(0,64)
-                        if pygame.sprite.spritecollideany(self.gracz1, self.boxgroup, collided = None) != None:
-                            self.gracz1.move(0,-64)
+                        self.gracz1.move(0, 64, self.background.get_rect())                        
+                        z = self.gracz1.czy_kolizja(self.boxgroup)
+                        if z == None:
+                            pass
+                        else:
+                            _czy_move = z.rect.center
+                            z.move(0, 64, self.background.get_rect())
+                            if z.rect.center == _czy_move:
+                                self.gracz1.move(0, -64, self.background.get_rect())
+                            
                     elif keys[pygame.K_UP]:
-                        self.gracz1.move(0,-64)
+                        self.gracz1.move(0,-64, self.background.get_rect())
+                        z = self.gracz1.czy_kolizja(self.boxgroup)
+                        if z == None:
+                            pass
+                        else:
+                            _czy_move = z.rect.center
+                            z.move(0, -64, self.background.get_rect())
+                            if z.rect.center == _czy_move:
+                                self.gracz1.move(0, 64, self.background.get_rect())                            
+                            
                     elif keys[pygame.K_RIGHT]:
-                        self.gracz1.move(64,0)
+                        self.gracz1.move(64,0, self.background.get_rect())
+                        z = self.gracz1.czy_kolizja(self.boxgroup)
+                        if z == None:
+                            pass
+                        else:
+                            _czy_move = z.rect.center
+                            z.move(64, 0, self.background.get_rect())  
+                            if z.rect.center == _czy_move:
+                                self.gracz1.move(-64, 0, self.background.get_rect())
+                                
                     elif keys[pygame.K_LEFT]:
-                        self.gracz1.move(-64,0)
+                        self.gracz1.move(-64,0, self.background.get_rect())
+                        z = self.gracz1.czy_kolizja(self.boxgroup)
+                        if z == None:
+                            pass
+                        else:
+                            _czy_move = z.rect.center
+                            z.move(-64, 0, self.background.get_rect())     
+                            if z.rect.center == _czy_move:
+                                self.gracz1.move(64, 0, self.background.get_rect())                            
+                        
                 self.allgroup.clear(self.screen, self.background)
                 self.boxgroup.clear(self.screen, self.background)
-                self.allgroup.draw(self.screen)       
                 self.boxgroup.draw(self.screen)
+                self.allgroup.draw(self.screen)       
+                #self.boxgroup.draw(self.screen)
                     
 if __name__ == '__main__':
     IsoGame()                   
@@ -265,7 +449,6 @@ if __name__ == '__main__':
 #             allgroup.clear(screen, background)
 #             allgroup.draw(screen)
 #==============================================================================
-                
                 
                 
                 

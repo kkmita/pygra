@@ -29,10 +29,15 @@ class IsoGame:
         def move(self, xmove, ymove, somescreen):
             # sprawdz czy nie trafiasz w ograniczenia
             self.rect.move_ip(xmove, ymove)
-            if self.rect.bottom > somescreen.bottom:
+            if (self.rect.bottom > somescreen.bottom or
+                self.rect.right > somescreen.right or
+                self.rect.left < somescreen.left or
+                self.rect.top < somescreen.top):
                 self.rect.move_ip(-xmove, -ymove)
-            
-            
+            elif self.czy_kolizja(grupa=wallsgroup) != None:
+                self.rect.move_ip(-xmove, -ymove)
+
+                                        
         def czy_kolizja(self, grupa):
             lista_sprite = pygame.sprite.spritecollide(self, grupa, dokill = False)
             if len(lista_sprite) == 0:
@@ -51,9 +56,54 @@ class IsoGame:
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
-        def move(self, xmove, ymove):
+        def move(self, xmove, ymove, somescreen):
             self.rect.move_ip(xmove, ymove)
+            if (self.rect.bottom > somescreen.bottom or
+                self.rect.right > somescreen.right or
+                self.rect.left < somescreen.left or
+                self.rect.top < somescreen.top):
+                self.rect.move_ip(-xmove, -ymove)                
+            elif self.czy_kolizja(grupa=wallsgroup) != None:
+                self.rect.move_ip(-xmove, -ymove)
+            #elif self.czy_kolizja(grupa=boxgroup) != None:
+            #    self.rect.move_ip(-xmove, -ymove)
+            elif self.czy_kolizja_box() != None:
+                self.rect.move_ip(-xmove, -ymove)
+
+                                        
+        def czy_kolizja(self, grupa):
+            lista_sprite = pygame.sprite.spritecollide(self, grupa, dokill = False)
+            if len(lista_sprite) == 0:
+                return None
+            else:
+                return lista_sprite[0]     
+
+#==============================================================================
+#         def czy_kolizja_box(self):
+#             if pygame.sprite.spritecollideany(self, self.groups().pop()) == None:
+#                 return None
+#             else:
+#                 return 1
+#==============================================================================
+        def czy_kolizja_box(self):
+            _grupa = self.groups().pop()
+            self.remove(_grupa)
+            if pygame.sprite.spritecollideany(self, _grupa) == None:
+                self.add(_grupa)
+                return None
+            else:
+                self.add(_grupa)
+                return 1
+           
             
+                
+                
+    class Wall(pygame.sprite.Sprite):
+        
+        def __init__(self, xpos, ypos):
+            pygame.sprite.Sprite.__init__(self)
+            self.image = pygame.image.load(os.path.join('../pictures', 'block_01.png'))
+            self.rect = self.image.get_rect(x = xpos, y = ypos)
     
     
     class Level:
@@ -240,7 +290,10 @@ class IsoGame:
         
         self.allgroup = pygame.sprite.Group()
         self.boxgroup = pygame.sprite.Group()
-        allgroup, boxgroup = self.allgroup, self.boxgroup
+        self.wallsgroup = pygame.sprite.Group()
+        
+        global wallsgroup
+        allgroup, boxgroup, wallsgroup = self.allgroup, self.boxgroup, self.wallsgroup
         
         
         # tworzymy gracza
@@ -264,6 +317,18 @@ class IsoGame:
         
         
             self.pudla[i].add(self.boxgroup)
+            
+            
+            
+        # tworzymy sciany
+        
+        self.walls = []
+    
+        for i in range(len(walls)):
+            self.walls.append(self.Wall(xpos = walls[i][0]*64,
+                                        ypos = walls[i][1]*64))
+            
+            self.walls[i].add(wallsgroup)
     
 #==============================================================================
 #         self.pudlo1 = self.Pudlo(xpos = boxes_startpos[0][0]*64,
@@ -300,19 +365,50 @@ class IsoGame:
                 elif event.type == pygame.locals.KEYDOWN:
                     #pressed_key = event.key
                     keys = pygame.key.get_pressed()
+                    
                     if keys[pygame.K_DOWN]:
                         self.gracz1.move(0, 64, self.background.get_rect())                        
                         z = self.gracz1.czy_kolizja(self.boxgroup)
                         if z == None:
                             pass
                         else:
-                            z.move(0, 64)
+                            _czy_move = z.rect.center
+                            z.move(0, 64, self.background.get_rect())
+                            if z.rect.center == _czy_move:
+                                self.gracz1.move(0, -64, self.background.get_rect())
+                            
                     elif keys[pygame.K_UP]:
                         self.gracz1.move(0,-64, self.background.get_rect())
+                        z = self.gracz1.czy_kolizja(self.boxgroup)
+                        if z == None:
+                            pass
+                        else:
+                            _czy_move = z.rect.center
+                            z.move(0, -64, self.background.get_rect())
+                            if z.rect.center == _czy_move:
+                                self.gracz1.move(0, 64, self.background.get_rect())                            
+                            
                     elif keys[pygame.K_RIGHT]:
                         self.gracz1.move(64,0, self.background.get_rect())
+                        z = self.gracz1.czy_kolizja(self.boxgroup)
+                        if z == None:
+                            pass
+                        else:
+                            _czy_move = z.rect.center
+                            z.move(64, 0, self.background.get_rect())  
+                            if z.rect.center == _czy_move:
+                                self.gracz1.move(-64, 0, self.background.get_rect())
+                                
                     elif keys[pygame.K_LEFT]:
                         self.gracz1.move(-64,0, self.background.get_rect())
+                        z = self.gracz1.czy_kolizja(self.boxgroup)
+                        if z == None:
+                            pass
+                        else:
+                            _czy_move = z.rect.center
+                            z.move(-64, 0, self.background.get_rect())     
+                            if z.rect.center == _czy_move:
+                                self.gracz1.move(64, 0, self.background.get_rect())                            
                         
                 self.allgroup.clear(self.screen, self.background)
                 self.boxgroup.clear(self.screen, self.background)
