@@ -11,6 +11,7 @@ import pygame.locals
 import configparser
 import sys
 import os
+import csv
 
 
 class IsoGame:
@@ -245,7 +246,7 @@ class IsoGame:
  
         #self.sciezka_nazwa = os.path.join("pyfiles","level.map")
         self.sciezka_nazwa = os.path.join("pyfiles",path)
-
+        self.lewel = int(path[5])
         
         level.load_file(self.sciezka_nazwa)
         
@@ -357,6 +358,22 @@ class IsoGame:
         
         
     def loop(self):
+        
+        #slownik z gra wczytac na poczatku probuje:
+        with open(os.path.join('pyfiles', 'settings.csv')) as csvfile:
+            reader = csv.reader(csvfile)
+            slownik = {}
+            for row in reader:
+                key = int(row[0])
+                if key in slownik:
+                    pass
+                else:
+                    slownik[key] = [row[1], int(row[2])]       
+                            
+        #krokomierz
+        krokomierz = 0
+        
+                
         while True:
             pygame.display.flip()
             self.clock.tick(15)
@@ -369,6 +386,9 @@ class IsoGame:
                     #pressed_key = event.key
                     keys = pygame.key.get_pressed()
                     
+                    #zapamietaj pozycje gracza
+                    poz_start_event = self.gracz1.rect.center
+                    
                     if keys[pygame.K_DOWN]:
                         self.gracz1.move(0, 64, self.background.get_rect())                        
                         z = self.gracz1.czy_kolizja(self.boxgroup)
@@ -376,7 +396,7 @@ class IsoGame:
                             pass
                         else:
                             _czy_move = z.rect.center
-                            z.move(0, 64, self.background.get_rect())
+                            z.move(0, 64, self.background.get_rect())                            
                             if z.rect.center == _czy_move:
                                 self.gracz1.move(0, -64, self.background.get_rect())
                             
@@ -389,7 +409,7 @@ class IsoGame:
                             _czy_move = z.rect.center
                             z.move(0, -64, self.background.get_rect())
                             if z.rect.center == _czy_move:
-                                self.gracz1.move(0, 64, self.background.get_rect())                            
+                                self.gracz1.move(0, 64, self.background.get_rect())
                             
                     elif keys[pygame.K_RIGHT]:
                         self.gracz1.move(64,0, self.background.get_rect())
@@ -398,7 +418,7 @@ class IsoGame:
                             pass
                         else:
                             _czy_move = z.rect.center
-                            z.move(64, 0, self.background.get_rect())  
+                            z.move(64, 0, self.background.get_rect())
                             if z.rect.center == _czy_move:
                                 self.gracz1.move(-64, 0, self.background.get_rect())
                                 
@@ -409,12 +429,13 @@ class IsoGame:
                             pass
                         else:
                             _czy_move = z.rect.center
-                            z.move(-64, 0, self.background.get_rect())     
+                            z.move(-64, 0, self.background.get_rect())
                             if z.rect.center == _czy_move:
-                                self.gracz1.move(64, 0, self.background.get_rect())                            
+                                self.gracz1.move(64, 0, self.background.get_rect())
                 
                 # wyrysowanie wszystkiego z for-a
-                
+                    if self.gracz1.rect.center != poz_start_event:
+                        krokomierz += 1
 #==============================================================================
 #                 goals_number = len(pygame.sprite.groupcollide(self.goalsgroup,
 #                     self.boxgroup, False, False))
@@ -426,7 +447,10 @@ class IsoGame:
                 
                 if count == len(self.goals):
                     Tekst_inst = self.Tekst(650, 10, "goli "+str(count), 10, 60, 60)
+                    Tekst_krokomierz = self.Tekst(650, 50, "krokow " + str(krokomierz),10,60,60)
+                    
                     Tekst_inst.add(self.Tekstgroup)
+                    Tekst_krokomierz.add(self.Tekstgroup)
                                                                                                 
                     self.allgroup.clear(self.screen, self.background)
                     self.boxgroup.clear(self.screen, self.background)
@@ -438,6 +462,23 @@ class IsoGame:
                     
                     Tekst_inst.kill()
                     pygame.display.flip()
+                    
+                    #odblokowanie tego lewelu
+                    slownik[self.lewel][0] = 'T'
+                    
+                    if slownik[self.lewel][1] != 0:
+                        if slownik[self.lewel][1] > krokomierz:
+                            slownik[self.lewel][1] = krokomierz
+                    else:
+                        slownik[self.lewel][1] = krokomierz
+
+                    with open(os.path.join('pyfiles', 'settings.csv'),'w') as csvfile:
+                        writer = csv.writer(csvfile)
+                        for i,j in slownik.items():
+                            writer.writerow([i,j[0],j[1]])
+                    
+                    
+                    
                     pygame.time.wait(3000)
                     pygame.quit()
                     exec(open(os.path.join('pyfiles', 'gamelevel.py')).read())
@@ -445,7 +486,10 @@ class IsoGame:
 
                 
                 Tekst_inst = self.Tekst(650, 10, "goli "+str(count), 10, 60, 60)
+                #Tekst_krokomierz = self.Tekst(650, 50, "krokow " + str(krokomierz),10,60,60)
+                
                 Tekst_inst.add(self.Tekstgroup)
+                #Tekst_krokomierz.add(self.Tekstgroup)
                                                                                             
                 self.allgroup.clear(self.screen, self.background)
                 self.boxgroup.clear(self.screen, self.background)

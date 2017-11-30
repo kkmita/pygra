@@ -85,10 +85,13 @@ def main():
                     active_button = change_button("up")
                 elif keys[pygame.K_RETURN]:
                     global path
+                    global active_level #w gameplay.py potrzebuje info o aktualnym lvl
                     if active_button == 0:
-                        path = "level.map"
+                        path = "level1.map"
+                        active_level = active_button+1
                     elif active_button == 1:
                         path = "level2.map"
+                        active_level = active_button+1
                     exec(open(os.path.join('pyfiles', 'gameplay.py')).read(), globals())
 
         screen.blit(background, (0,0))
