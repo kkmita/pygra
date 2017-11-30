@@ -1,0 +1,40 @@
+[level]
+#tileset = player.png
+map =	||||####|||||
+	||||#$.#|||||
+	|||##..##||||
+	|||#.o+#####|
+	|||#+o.#...#|
+	|###oo+#.#.#|
+	|#..oo+..+.#|
+	|#.+.+.#.###|
+	|#####.#.#|||
+	|||||#...#|||
+	|||||###o#|||
+	|||||||###|||
+
+[.]
+name = floor
+tile = 0
+
+[#]
+name = wall
+tile = 1
+wall = true
+block = true
+
+[$]
+name = player
+tile = 2
+
+[+]
+name = box
+tile = 3
+
+[o]
+name = goal
+tile = 4
+
+[|]
+name = zapchaj
+tile = 3

@@ -23,7 +23,7 @@ def main():
     background = background.convert()
     background.fill((255, 255, 255))    
     
-    font = pygame.font.SysFont("comicsansms", 72)
+    font = pygame.font.SysFont("comicsansms", 50)
     
     
     # zaczytaj aktualny stan slownika!
@@ -38,12 +38,12 @@ def main():
                 slownik[key] = [row[1], int(row[2])]
                     
     
-    captions = ["lvl1", "lvl2", "lvl3", "lvl4", "lvl5"]
-    buttons = ['', '', '', '', '']
+    captions = ["lvl1", "lvl2", "lvl3", "lvl4", "lvl5", "lvl6", "lvl7", "lvl8"]
+    buttons = ['']*8
 
     for i in range(len(buttons)):
         buttons[i] = font.render(captions[i], 1, (10, 10, 10))
-        background.blit(buttons[i], (50, 100+100*i))
+        background.blit(buttons[i], (50, 100+50*i))
         
     active_button = 0
     
@@ -55,7 +55,7 @@ def main():
     # funkcja zmieniajaca levele
     def change_button(updown):
         if updown == "down":
-            if active_button < len(buttons) and slownik[active_button+1][0] == 'T':
+            if active_button < (len(buttons)-1)  and slownik[active_button+1][0] == 'T':
                 return (active_button+1)
             else:
                 return (active_button)
@@ -85,20 +85,32 @@ def main():
                     active_button = change_button("up")
                 elif keys[pygame.K_RETURN]:
                     global path
-                    global active_level #w gameplay.py potrzebuje info o aktualnym lvl
                     if active_button == 0:
                         path = "level1.map"
-                        active_level = active_button+1
                     elif active_button == 1:
                         path = "level2.map"
-                        active_level = active_button+1
+                    elif active_button == 2:
+                        path = "level3.map"
+                    elif active_button == 3:
+                        path = "level4.map"
+                    elif active_button == 4:
+                        path = "level5.map"
+                    elif active_button == 5:
+                        path = "level6.map"
+                    elif active_button == 6:
+                        path = "level7.map"
+                    elif active_button == 7:
+                        path = "level8.map"
+                    elif active_button == 8:
+                        path = "level9.map"
+                                        
                     exec(open(os.path.join('pyfiles', 'gameplay.py')).read(), globals())
 
         screen.blit(background, (0,0))
         
         buttons[active_button] = font.render(captions[active_button], 1, (250,10,255))
         
-        screen.blit(buttons[active_button], (50,100+100*active_button))
+        screen.blit(buttons[active_button], (50,100+50*active_button))
                     
         pygame.display.flip()
         

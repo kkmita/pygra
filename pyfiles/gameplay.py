@@ -271,7 +271,7 @@ class IsoGame:
         # zbudowanie tla dopiero po wczytaniu levelu - by nie bylo za wielkie
         #self.screen = pygame.display.set_mode((1100, 800))
         #self.screen = pygame.display.set_mode((64*(self.MAP_TILE_WIDTH+2), 64*(self.MAP_TILE_HEIGHT+2)))
-        obiekt = (64*(level.width), 64*(level.height+2))
+        obiekt = (64*(level.width+2), 64*(level.height+2))
  
         self.screen = pygame.display.set_mode(obiekt)
         screen = self.screen
