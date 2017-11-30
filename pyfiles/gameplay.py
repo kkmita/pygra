@@ -111,6 +111,15 @@ class IsoGame:
             self.rect = self.image.get_rect(x = xpos, y = ypos)
             
             
+    #obramowanie dokola
+    class Zapchaj(pygame.sprite.Sprite):
+        
+        def __init__(self, xpos, ypos):
+            pygame.sprite.Sprite.__init__(self)
+            self.image = pygame.image.load(os.path.join('pictures', 'zapchajdziura.png'))
+            self.rect = self.image.get_rect(x = xpos, y = ypos)
+            
+            
             
     class Goal(pygame.sprite.Sprite):
         
@@ -175,6 +184,8 @@ class IsoGame:
                         tile = 1
                     elif self.get_tile(map_x, map_y)['name'] == 'goal':
                         tile = 2
+                    elif self.get_tile(map_x, map_y)['name'] == 'zapchaj':
+                        tile = 3
                     else:
                         tile = 0
                         
@@ -189,6 +200,7 @@ class IsoGame:
         def render_objects(self):
             
             walls = []
+            zapchajs = [] #dodanie okolania mapki
             goals = []
             boxes_startpos = []
             
@@ -196,14 +208,17 @@ class IsoGame:
                 for map_x, c in enumerate(line):
                     if self.get_tile(map_x, map_y)['name'] == 'wall':
                         walls.append((map_x, map_y))
+                    elif self.get_tile(map_x, map_y)['name'] == 'zapchaj':
+                        zapchajs.append((map_x, map_y))                        
                     elif self.get_tile(map_x, map_y)['name'] == 'box':
                         boxes_startpos.append((map_x, map_y))
                     elif self.get_tile(map_x, map_y)['name'] == 'goal':
                         goals.append((map_x, map_y))
                     elif self.get_tile(map_x, map_y)['name'] == 'player':
                         _gracz_startpos = (map_x, map_y)
+                    
 
-            return _gracz_startpos, boxes_startpos, walls, goals
+            return _gracz_startpos, boxes_startpos, walls, zapchajs, goals
             
         
     
@@ -231,8 +246,10 @@ class IsoGame:
         
         
         # ustawienie buforu na grafike
-        self.screen = pygame.display.set_mode((1600, 1000))
-        screen = self.screen
+#==============================================================================
+#         self.screen = pygame.display.set_mode((1600, 1000))
+#         screen = self.screen
+#==============================================================================
 
 
 #!+++++++++++++++++++++++++++++++++++++++
@@ -249,6 +266,15 @@ class IsoGame:
         self.lewel = int(path[5])
         
         level.load_file(self.sciezka_nazwa)
+        
+        
+        # zbudowanie tla dopiero po wczytaniu levelu - by nie bylo za wielkie
+        #self.screen = pygame.display.set_mode((1100, 800))
+        #self.screen = pygame.display.set_mode((64*(self.MAP_TILE_WIDTH+2), 64*(self.MAP_TILE_HEIGHT+2)))
+        obiekt = (64*(level.width), 64*(level.height+2))
+ 
+        self.screen = pygame.display.set_mode(obiekt)
+        screen = self.screen
         
         
 #!+++++++++++++++++++++++++++++++++++++++
@@ -272,7 +298,8 @@ class IsoGame:
         
         self.tiles = [pygame.image.load(os.path.join('pictures', 'ground_06.png')), 
                       pygame.image.load(os.path.join('pictures', 'block_01.png')),
-                      pygame.image.load(os.path.join('pictures', 'ground_03.png'))]
+                      pygame.image.load(os.path.join('pictures', 'ground_03.png')),
+                      pygame.image.load(os.path.join('pictures', 'zapchajdziura.png'))]
 
         tiles = self.tiles
 
@@ -281,7 +308,7 @@ class IsoGame:
         self.background = self.level.render_background(self.tiles)
         background = self.background
 
-        gracz_startpos, boxes_startpos, walls_pos, goals_pos = level.render_objects()
+        gracz_startpos, boxes_startpos, walls_pos, zapchajs_pos, goals_pos = level.render_objects()
 
         
         # grupy spriteow
@@ -289,6 +316,7 @@ class IsoGame:
         self.allgroup = pygame.sprite.Group()
         self.boxgroup = pygame.sprite.Group()
         self.wallsgroup = pygame.sprite.Group()
+        #self.zapchajsgroup = pygame.sprite.Group()
         self.goalsgroup = pygame.sprite.Group()
         self.Tekstgroup = pygame.sprite.Group()
         
@@ -327,6 +355,18 @@ class IsoGame:
             
             self.walls[i].add(wallsgroup)
             
+        #############################
+        # dodajemy instancje klasy 'zapchaj' do grupy 'walls'
+        
+        self.zapchajs = []
+        
+        for i in range(len(zapchajs_pos)):
+            self.zapchajs.append(self.Zapchaj(xpos = zapchajs_pos[i][0]*64,
+                                              ypos = zapchajs_pos[i][1]*64))
+            
+            self.zapchajs[i].add(wallsgroup)
+            
+        #####################################
             
         # tworzymy cele
         
