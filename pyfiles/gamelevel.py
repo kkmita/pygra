@@ -11,6 +11,7 @@ import pygame.locals
 import os
 import configparser
 import sys
+import csv as csv
 
 
 def main():
@@ -25,10 +26,22 @@ def main():
     font = pygame.font.SysFont("comicsansms", 72)
     
     
-    captions = ["lvl1", "lvl2"]
-    buttons = ['', '']
+    # zaczytaj aktualny stan slownika!
+    with open(os.path.join('pyfiles', 'settings.csv')) as csvfile:
+        reader = csv.reader(csvfile)
+        slownik = {}
+        for row in reader:
+            key = int(row[0])
+            if key in slownik:
+                pass
+            else:
+                slownik[key] = [row[1], int(row[2])]
+                    
+    
+    captions = ["lvl1", "lvl2", "lvl3", "lvl4", "lvl5"]
+    buttons = ['', '', '', '', '']
 
-    for i in range(2):
+    for i in range(len(buttons)):
         buttons[i] = font.render(captions[i], 1, (10, 10, 10))
         background.blit(buttons[i], (50, 100+100*i))
         
@@ -42,11 +55,16 @@ def main():
     # funkcja zmieniajaca levele
     def change_button(updown):
         if updown == "down":
-            if active_button < 1:
+            if active_button < len(buttons) and slownik[active_button+1][0] == 'T':
                 return (active_button+1)
+            else:
+                return (active_button)
         else:
-            if active_button > 0:
+            if active_button > 0 and slownik[active_button][0] == 'T':
                 return (active_button-1)
+            else:
+                return (active_button)
+
         
     
     
@@ -70,7 +88,7 @@ def main():
                     if active_button == 0:
                         path = "level.map"
                     elif active_button == 1:
-                        path = "level2.map"                        
+                        path = "level2.map"
                     exec(open(os.path.join('pyfiles', 'gameplay.py')).read(), globals())
 
         screen.blit(background, (0,0))

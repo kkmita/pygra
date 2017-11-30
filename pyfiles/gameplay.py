@@ -424,7 +424,7 @@ class IsoGame:
                     if pygame.sprite.spritecollideany(self.goals[j], self.boxgroup) != None:
                         count += 1
                 
-                if count == 2:
+                if count == len(self.goals):
                     Tekst_inst = self.Tekst(650, 10, "goli "+str(count), 10, 60, 60)
                     Tekst_inst.add(self.Tekstgroup)
                                                                                                 
