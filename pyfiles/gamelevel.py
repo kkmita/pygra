@@ -38,8 +38,8 @@ def main():
                 slownik[key] = [row[1], int(row[2])]
                     
     
-    captions = ["lvl1", "lvl2", "lvl3", "lvl4", "lvl5", "lvl6", "lvl7", "lvl8"]
-    buttons = ['']*8
+    captions = ["powrot", "lvl1", "lvl2", "lvl3", "lvl4", "lvl5", "lvl6", "lvl7", "lvl8"]
+    buttons = ['']*9
 
     for i in range(len(buttons)):
         buttons[i] = font.render(captions[i], 1, (10, 10, 10))
@@ -62,12 +62,12 @@ def main():
     # funkcja zmieniajaca levele
     def change_button(updown):
         if updown == "down":
-            if active_button < (len(buttons)-1)  and slownik[active_button+1][0] == 'T':
+            if active_button < (len(buttons)-1)  and slownik[active_button][0] == 'T':
                 return (active_button+1)
             else:
                 return (active_button)
         else:
-            if active_button > 0 and slownik[active_button][0] == 'T':
+            if active_button > 0 and slownik[active_button-1][0] == 'T':
                 return (active_button-1)
             else:
                 return (active_button)
@@ -113,24 +113,26 @@ def main():
                         active_button = change_button_cheat("up")
                 elif keys[pygame.K_RETURN]:
                     global path
-                    if active_button == 0:
+                    if active_button == 1:
                         path = "level1.map"
-                    elif active_button == 1:
-                        path = "level2.map"
                     elif active_button == 2:
-                        path = "level3.map"
+                        path = "level2.map"
                     elif active_button == 3:
-                        path = "level4.map"
+                        path = "level3.map"
                     elif active_button == 4:
-                        path = "level5.map"
+                        path = "level4.map"
                     elif active_button == 5:
-                        path = "level6.map"
+                        path = "level5.map"
                     elif active_button == 6:
-                        path = "level7.map"
+                        path = "level6.map"
                     elif active_button == 7:
-                        path = "level8.map"
+                        path = "level7.map"
                     elif active_button == 8:
+                        path = "level8.map"
+                    elif active_button == 9:
                         path = "level9.map"
+                    elif active_button == 0:
+                        exec(open(os.path.join('gamegui.py')).read())
                                         
                     exec(open(os.path.join('pyfiles', 'gameplay.py')).read(), globals())
 

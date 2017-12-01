@@ -472,6 +472,11 @@ class IsoGame:
                             z.move(-64, 0, self.background.get_rect())
                             if z.rect.center == _czy_move:
                                 self.gracz1.move(64, 0, self.background.get_rect())
+                                
+                    # powrot do menu
+                    elif keys[pygame.K_r]:
+                        pygame.quit()
+                        exec(open(os.path.join('pyfiles', 'gamelevel.py')).read())
                 
                 # wyrysowanie wszystkiego z for-a
                     if self.gracz1.rect.center != poz_start_event:
