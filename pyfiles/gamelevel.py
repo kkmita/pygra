@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov 18 22:35:04 2017
 
-@author: kamil
-"""
 
 import pygame
 import pygame.locals
