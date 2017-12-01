@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov 17 20:49:59 2017
+Created on Fri Dec  1 13:56:19 2017
 
 @author: kamil
 """
@@ -9,37 +9,43 @@ Created on Fri Nov 17 20:49:59 2017
 import pygame
 import pygame.locals
 import os
-import sys
-import configparser
-import csv
 
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((1000, 800))
-    pygame.display.set_caption('Gra Sokoban')
+    pygame.display.set_caption('Gra Sokoban - levele')
     
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     background.fill((255, 255, 255))    
     
-    font = pygame.font.SysFont("comicsansms", 72)
+    font = pygame.font.SysFont("comicsansms", 50)
     
     
-    captions = ["Play", "Zmien uczciwosc"]
-    buttons = [0, 0]
+    # zaczytaj aktualny stan slownika!
 
-    for i in range(2):
+                    
+    
+    captions = ["cheatuj", "uczciwy", "powrot"]
+    buttons = ['']*3
+
+    for i in range(len(buttons)):
         buttons[i] = font.render(captions[i], 1, (10, 10, 10))
-        background.blit(buttons[i], (50, 100+100*i))
+        background.blit(buttons[i], (50, 100+50*i))
+    
         
     active_button = 0
     
-
     screen.blit(background, (0, 0))
     pygame.display.flip()
     
     
+    
+    # cheatujemy czy nie?
+    with open(os.path.join('pyfiles', 'cheat.txt'), 'r') as ustaw:
+        cheat = ustaw.readline().strip('\n\r')
+
     
     def change_button(updown):
         if updown == "down":
@@ -52,6 +58,10 @@ def main():
                 return (active_button-1)
             else:
                 return (active_button)
+    
+      
+    
+    
     
     
     
@@ -69,28 +79,30 @@ def main():
                     active_button = change_button("up")
                 elif keys[pygame.K_RETURN]:
                     if active_button == 0:
-                        exec(open(os.path.join('pyfiles', 'gamelevel.py')).read())
+                        #cheatuj
+                        with open(os.path.join('pyfiles', 'cheat.txt'), 'w') as file:
+                            file.write('Y')
                     elif active_button == 1:
-                        exec(open(os.path.join('pyfiles', 'gamecheat.py')).read())
-                        
+                        with open(os.path.join('pyfiles', 'cheat.txt'), 'w') as file:
+                            file.write('N')
+                    elif active_button == 2:
+                        exec(open(os.path.join('gamegui.py')).read())
+                    else:
+                        pass
+    
+    
+
+
         screen.blit(background, (0,0))
         
         buttons[active_button] = font.render(captions[active_button], 1, (250,10,255))
         
-        screen.blit(buttons[active_button], (50,100+100*active_button))
+        screen.blit(buttons[active_button], (50,100+50*active_button))
                     
-        pygame.display.flip()
-                    
-
-                
-#==============================================================================
-#         keys = pygame.key.get_pressed()
-#         if keys[pygame.K_RETURN]:
-#             exec(open(os.path.join('pyfiles', 'gamelevel.py')).read())
-#==============================================================================
-                
-                
         pygame.display.flip()
         
 if __name__ == '__main__':
     main()
+
+
+

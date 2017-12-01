@@ -52,6 +52,13 @@ def main():
     
     
     
+    # cheatujemy czy nie?
+    with open(os.path.join('pyfiles', 'cheat.txt'), 'r') as ustaw:
+        cheat = ustaw.readline().strip('\n\r')
+
+    
+    
+    
     # funkcja zmieniajaca levele
     def change_button(updown):
         if updown == "down":
@@ -61,6 +68,21 @@ def main():
                 return (active_button)
         else:
             if active_button > 0 and slownik[active_button][0] == 'T':
+                return (active_button-1)
+            else:
+                return (active_button)
+                
+                
+                
+    # cheaterska funkcja zmieniajaca level
+    def change_button_cheat(updown):
+        if updown == "down":
+            if active_button < (len(buttons)-1):
+                return (active_button+1)
+            else:
+                return (active_button)
+        else:
+            if active_button > 0:
                 return (active_button-1)
             else:
                 return (active_button)
@@ -80,9 +102,15 @@ def main():
             elif event.type == pygame.locals.KEYDOWN:
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_DOWN]:
-                    active_button = change_button("down")
+                    if cheat == 'N':
+                        active_button = change_button("down")
+                    else:
+                        active_button = change_button_cheat("down")
                 elif keys[pygame.K_UP]:
-                    active_button = change_button("up")
+                    if cheat == 'N':
+                        active_button = change_button("up")
+                    else:
+                        active_button = change_button_cheat("up")
                 elif keys[pygame.K_RETURN]:
                     global path
                     if active_button == 0:
